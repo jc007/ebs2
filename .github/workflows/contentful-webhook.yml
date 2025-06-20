@@ -1,0 +1,40 @@
+name: Contentful Content Update
+
+on:
+  repository_dispatch:
+    types: [contentful-update]
+
+jobs:
+  trigger-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.CONTENTFUL_WEBHOOK_TOKEN }}
+        
+    - name: Create trigger commit
+      run: |
+        git config --local user.email "contentful-webhook@github.com"
+        git config --local user.name "Contentful Webhook"
+        
+        # Create or update a trigger file
+        echo "Last updated: $(date -u)" > .contentful-trigger
+        echo "Event: ${{ github.event.client_payload.event_type || 'content-update' }}" >> .contentful-trigger
+        echo "Entry ID: ${{ github.event.client_payload.entry_id || 'unknown' }}" >> .contentful-trigger
+        echo "Content Type: ${{ github.event.client_payload.content_type || 'unknown' }}" >> .contentful-trigger
+        
+        git add .contentful-trigger
+        
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Content update from Contentful [trigger build]
+          
+          - Event: ${{ github.event.client_payload.event_type || 'content-update' }}
+          - Entry: ${{ github.event.client_payload.entry_id || 'unknown' }}
+          - Type: ${{ github.event.client_payload.content_type || 'unknown' }}
+          - Time: $(date -u)"
+          git push origin main
+        fi
