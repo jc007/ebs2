@@ -16,7 +16,7 @@ jobs:
     
     # Set permissions for GITHUB_TOKEN
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     
@@ -46,10 +46,11 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add publish/
+        git config --local --add safe.directory /github/workspace
+        git add publish/ || true
         if git diff --staged --quiet; then
           echo "No changes to commit"
         else
-          git commit -m "Build: Update generated files [skip ci]"
-          git push
+          git commit -m "Build: Update generated files [skip ci]" || true
+          git push origin main || true
         fi
