@@ -1,0 +1,52 @@
+name: Build Astro Site
+
+# Trigger the workflow on push to main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Allow manual triggering from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checkout the repository code
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    # Setup Node.js environment
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    # Install dependencies
+    - name: Install dependencies
+      run: npm ci
+      
+    # Build the Astro project
+    - name: Build Astro site
+      run: npm run build
+      
+    # Upload build artifacts (optional - for downloading the built files)
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: astro-build
+        path: publish/
+        retention-days: 30
+        
+    # Deploy to GitHub Pages (optional)
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./publish
+        publish_branch: gh-pages

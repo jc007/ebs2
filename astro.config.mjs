@@ -5,4 +5,5 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   site: 'https://jc007.github.io',
   base: '/ebs2',
+  outDir: 'publish'
 });
