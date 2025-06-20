@@ -19,22 +19,23 @@ jobs:
         git config --local user.email "contentful-webhook@github.com"
         git config --local user.name "Contentful Webhook"
         
-        # Create or update a trigger file
+        # Create or update a trigger file with unique content
         echo "Last updated: $(date -u)" > .contentful-trigger
         echo "Event: ${{ github.event.client_payload.event_type || 'content-update' }}" >> .contentful-trigger
         echo "Entry ID: ${{ github.event.client_payload.entry_id || 'unknown' }}" >> .contentful-trigger
         echo "Content Type: ${{ github.event.client_payload.content_type || 'unknown' }}" >> .contentful-trigger
+        echo "Run ID: ${{ github.run_id }}" >> .contentful-trigger
+        echo "Timestamp: $(date +%s)" >> .contentful-trigger
         
         git add .contentful-trigger
         
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "Content update from Contentful [trigger build]
-          
-          - Event: ${{ github.event.client_payload.event_type || 'content-update' }}
-          - Entry: ${{ github.event.client_payload.entry_id || 'unknown' }}
-          - Type: ${{ github.event.client_payload.content_type || 'unknown' }}
-          - Time: $(date -u)"
-          git push origin main
-        fi
+        # Always commit since we're adding unique identifiers
+        git commit -m "Content update from Contentful [trigger build]
+
+        - Event: ${{ github.event.client_payload.event_type || 'content-update' }}
+        - Entry: ${{ github.event.client_payload.entry_id || 'unknown' }}
+        - Type: ${{ github.event.client_payload.content_type || 'unknown' }}
+        - Time: $(date -u)
+        - Run: ${{ github.run_id }}"
+        
+        git push origin main
