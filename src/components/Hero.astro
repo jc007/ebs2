@@ -1,0 +1,72 @@
+---
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+
+interface Props {
+  hero: {
+    fields: {
+      title: string;
+      subtitle: any; // Rich text document
+    };
+  };
+}
+
+const { hero } = Astro.props;
+const subtitleHtml = documentToHtmlString(hero.fields.subtitle);
+---
+
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">{hero.fields.title}</h1>
+    <div class="hero-subtitle" set:html={subtitleHtml} />
+  </div>
+</section>
+
+<style>
+  .hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+
+  .hero-subtitle :global(p) {
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle :global(strong) {
+    font-weight: 600;
+  }
+
+  .hero-subtitle :global(em) {
+    font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 3rem 1rem;
+      min-height: 50vh;
+    }
+  }
+</style>
